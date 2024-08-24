@@ -21,6 +21,7 @@ TRUELAYER_DOMAIN = {
 MONGO_URI = "db"
 
 
+
 mongo_client = MongoClient(host=MONGO_URI)
 transactions = mongo_client["transactions"]["transactions"]
 users = mongo_client["transactions"]["users"]
@@ -56,10 +57,7 @@ def process_user(user):
 
 
 def sync_user_transactions(user):
-    transactions = map(
-        lambda transaction: format_transaction(user, transaction),
-        get_all_user_transactions(user),
-    )
+    transactions = get_all_user_transactions(user)
     for transaction in transactions:
         update_transaction(transaction)
     logger.info(f"Synced transactions for user {user['_id']}")
@@ -79,7 +77,7 @@ def format_transaction(user, bank, account, transaction):
 def refresh_bank_accounts(user):
     for bank in user["banks"]:
         accounts = get_accounts(user, bank)["results"]
-        user("banks")[bank]["accounts"] = accounts
+        user["banks"][bank]["accounts"] = accounts
     users.update_one(
         {"_id": user["_id"]},
         {"$set": {"banks": user["banks"]}},
@@ -108,8 +106,9 @@ def get_all_user_transactions(user):
     for bank in user["banks"]:
         for account in user["banks"][bank].get("accounts", []):
             account_transactions = get_transactions(
-                user["banks"][bank]["access_token"],
-                account["account_id"],
+                user,
+                bank,
+                account
             )["results"]
             transactions.extend(
                 map(
