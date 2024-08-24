@@ -1,0 +1,32 @@
+services:
+  task:
+    build: ./task
+    command: "python -m transactions-task"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    restart: unless-stopped
+  api:
+    build: ./api
+    command: "gunicorn --bind 0.0.0.0:8000 -w 4 'transactions-api:app'"
+    env_file:
+      - .env
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    restart: unless-stopped
+  db:
+    image: mongo:latest
+    restart: unless-stopped
+    volumes:
+      - /data/db/transactions:/data/db
+  mongo-express:
+    image: mongo-express:latest
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_SERVER: db
+    depends_on:
+      - db

@@ -1,0 +1,23 @@
+[project]
+name = "transactions-api"
+version = "0.1.0"
+dependencies = [
+    "pyyaml",
+    "requests",
+    "pp-ez",
+    "urllib3",
+    "pymongo",
+    "flask",
+    "gunicorn"
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 88
+target-version = ["py38"]
+
+[tool.isort]
+profile = "black"
