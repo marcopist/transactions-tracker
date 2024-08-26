@@ -18,11 +18,11 @@ MONGO_URI = "db"
 
 app = flask.Flask(__name__)
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
-MONGO_CLIENT = MongoClient(host=MONGO_URI)
-TRANSACTIONS = MONGO_CLIENT["transactions"]["transactions"]
-USERS = MONGO_CLIENT["transactions"]["users"]
+mongo_client = MongoClient(host=MONGO_URI)
+transactions = mongo_client["transactions"]["transactions"]
+users = mongo_client["transactions"]["users"]
 
 def build_url(base_url, path, args_dict):
     # Returns a list in the structure of urlparse.ParseResult
@@ -65,7 +65,7 @@ def exchange_code_for_token(user, bank, code):
     response = requests.post(url, data=payload).json()
     access_token = response["access_token"]
     refresh_token = response["refresh_token"]
-    USERS.update_one(
+    users.update_one(
         {"_id": user},
         {
             "$set": {
@@ -77,6 +77,17 @@ def exchange_code_for_token(user, bank, code):
     )
 
     return "Done"
+
+@app.route("/transactions/user")
+def get_all_user_transactions(user):
+    user_transactions = transactions.find({"user": user})
+    return list(user_transactions)
+
+@app.route("/singup", methods=["POST"])
+def sign_up():
+    data = request.form
+    print(data)
+    return 0
 
 
 if __name__ == "__main__":
