@@ -1,6 +1,7 @@
 import logging
 import os
-import flask
+from flask import Flask, request
+
 import urllib.parse
 
 import requests
@@ -16,13 +17,15 @@ TRUELAYER_DOMAIN = {
 
 MONGO_URI = "db"
 
-app = flask.Flask(__name__)
+app = Flask(__name__)
 
 logger = logging.getLogger(__name__)
 
 mongo_client = MongoClient(host=MONGO_URI)
 transactions = mongo_client["transactions"]["transactions"]
 users = mongo_client["transactions"]["users"]
+
+user = "marcopist"
 
 def build_url(base_url, path, args_dict):
     # Returns a list in the structure of urlparse.ParseResult
@@ -52,8 +55,11 @@ def make_truelayer_transaction_link():
     return link
 
 
-@app.route("/store/<user>/<bank>/<code>")
-def exchange_code_for_token(user, bank, code):
+@app.route("/bank", methods=["POST"])
+def exchange_code_for_token():
+    data = request.form
+    bank = data["bank"]
+    code = data["code"]
     url = f"https://auth.{TRUELAYER_DOMAIN}/connect/token"
     payload = {
         "client_id": TRUELAYER_CLIENT_ID,
@@ -78,17 +84,11 @@ def exchange_code_for_token(user, bank, code):
 
     return "Done"
 
-@app.route("/transactions/user")
-def get_all_user_transactions(user):
+@app.route("/transactions")
+def get_all_user_transactions():
     user_transactions = transactions.find({"user": user})
     return list(user_transactions)
 
-@app.route("/singup", methods=["POST"])
-def sign_up():
-    data = request.form
-    print(data)
-    return 0
-
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0:8000")
+    app.run()

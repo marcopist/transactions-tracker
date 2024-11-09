@@ -2,12 +2,8 @@
 name = "transactions-task"
 version = "0.1.0"
 dependencies = [
-    "pyyaml",
-    "requests",
-    "pp-ez",
-    "urllib3",
     "pymongo",
-    "flask",
+    "nordigen"
 ]
 
 [build-system]
