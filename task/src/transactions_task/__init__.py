@@ -1,10 +1,10 @@
-import os
+import os, sys
 
 import uuid
 from nordigen import NordigenClient
 from requests import HTTPError
 from pymongo import MongoClient
-import logging
+from loguru import logger
 
 
 GO_CARDLESS_SECRET_ID = os.getenv("GO_CARDLESS_SECRET_ID")
@@ -20,8 +20,6 @@ db = mongo_client["transactions"]
 sessions_collection = db["sessions"]
 transactions_collection = db["transactions"]
 
-
-logger = logging.getLogger(__name__)
 
 token_data = nordigen_client.generate_token()
 
@@ -45,10 +43,13 @@ def retry_with_new_token(func):
 
 @retry_with_new_token
 def link_account(bank_name: str):
-    institution = nordigen_client.institution.get_institution_id_by_name(
-        country="GB",
-        institution=bank_name,
-    )
+    if bank_name == "sandbox":
+        institution = "SANDBOXFINANCE_SFIN0000"
+    else:
+        institution = nordigen_client.institution.get_institution_id_by_name(
+            country="GB",
+            institution=bank_name,
+        )
     session = nordigen_client.initialize_session(
         institution_id=institution,
         redirect_uri="http://localhost:3000",
@@ -74,8 +75,9 @@ def get_all_transactions():
 
         for account_id in accounts:
             account = nordigen_client.account_api(id=account_id)
-            acct_transactions = account.get_transactions()
-            transactions.extend(acct_transactions)
+            acct_transactions = account.get_transactions()["transactions"]
+            all_transactions = acct_transactions["booked"] + acct_transactions["pending"]
+            transactions.extend(all_transactions)
 
     return transactions
 
@@ -88,6 +90,8 @@ def add_id_to_transaction(transaction):
 @retry_with_new_token
 def task():
     online_transactions = get_all_transactions()
+
+    logger.info(f"Got {len(online_transactions)} transactions")
 
     transactions_already_present = [
         transaction["_id"]
@@ -103,10 +107,14 @@ def task():
         )
     ]
 
+    logger.info(f"{len(transactions_already_present)} were already present")
+
     transactions_to_insert = [
         add_id_to_transaction(transaction)
         for transaction in online_transactions
         if transaction["transactionId"] not in transactions_already_present
     ]
+
+    logger.info(f"Loading {len(transactions_to_insert)} transactions into Mongodb")
 
     transactions_collection.insert_many(transactions_to_insert)

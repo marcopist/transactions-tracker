@@ -1,9 +1,7 @@
 from transactions_task import task
+from loguru import logger
 from time import sleep
 
-RUN_EVERY = 60 * 5
-
 if __name__ == "__main__":
-    while True:
-        task()
-        sleep(RUN_EVERY)
+    logger.info("Starting task script")
+    task()

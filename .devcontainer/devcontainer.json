@@ -1,4 +1,10 @@
 {
     "name": "Python Development",
-    "image": "mcr.microsoft.com/vscode/devcontainers/python:3.12"
+    "image": "mcr.microsoft.com/vscode/devcontainers/python:3.12",
+    "runArgs": [
+        "--network=host"
+    ],
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    }
 }

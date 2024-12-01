@@ -3,7 +3,8 @@ name = "transactions-task"
 version = "0.1.0"
 dependencies = [
     "pymongo",
-    "nordigen"
+    "nordigen",
+    "loguru"
 ]
 
 [build-system]
