@@ -1,11 +1,9 @@
 [project]
-name = "transactions-task"
+name = "transactions-model"
 version = "0.1.0"
 dependencies = [
-    "transactions-model",
-    "pymongo",
-    "nordigen",
-    "loguru"
+    "pydantic",
+    "iso4217",
 ]
 
 [build-system]
