@@ -2,7 +2,7 @@
 name = "transactions-model"
 version = "0.1.0"
 dependencies = [
-    "pydantic",
+    "beanie",
     "iso4217",
 ]
 

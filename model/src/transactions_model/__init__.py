@@ -11,7 +11,7 @@ class BaseSchema(BaseModel):
         populate_by_name=True,
         from_attributes=True,
     )
-    
+
 
 class Amount(BaseSchema):
     currency: Currency
@@ -53,7 +53,7 @@ class Transaction(BaseSchema):
     transaction_type: TransactionType = Field(discriminator="transaction_type")
 
     def to_json(self):
-        return self.model_dump()
+        return self.model_dump(mode="json")
 
     @classmethod
     def from_json(cls, json_data: dict):
@@ -110,7 +110,7 @@ class Transaction(BaseSchema):
             short_name=short_name,
             transaction_type=transaction_type,
         )
-    
+
     def process_nordigen_update(
         self,
         new_transaction: "Transaction",

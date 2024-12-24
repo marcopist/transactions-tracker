@@ -11,19 +11,16 @@ GO_CARDLESS_SECRET_ID = os.getenv("GO_CARDLESS_SECRET_ID")
 GO_CARDLESS_SECRET_KEY = os.getenv("GO_CARDLESS_SECRET_KEY")
 DRY_RUN = os.getenv("DRY_RUN", "false").lower() == "true"
 MONGO_URI = os.getenv("MONGO_URI")
+MONGO_DB_NAME = os.getenv("MONGO_DB_NAME")
 
 if MONGO_URI is None:
     raise ValueError("MONGO_URI is not set")
 
 nordigen_client = NordigenClient(GO_CARDLESS_SECRET_KEY, GO_CARDLESS_SECRET_ID)
 mongo_client = MongoClient(MONGO_URI)
-db = mongo_client["transactions"]
+db = mongo_client[MONGO_DB_NAME]
 sessions_collection = db["sessions"]
-if not DRY_RUN:
-    transactions_collection = db["transactions"]
-else:
-    transactions_collection = db["sandbox_transactions"]
-
+transactions_collection = db["transactions"]
 
 token_data = nordigen_client.generate_token()
 
@@ -68,11 +65,7 @@ def link_account(bank_name: str):
 
 @retry_with_new_token
 def get_all_transactions():
-    if not DRY_RUN:
-        sessions = sessions_collection.find({"$not": {"bank_name": "sandbox"}})
-    else:
-        sessions = sessions_collection.find({"bank_name": "sandbox"})
-
+    sessions = sessions_collection.find()
     transactions = []
     for session in sessions:
         bank_name = session["bank_name"]
@@ -115,4 +108,3 @@ def task():
                 {"$set": updated_transaction.to_json()},
             )
             logger.info(f"Transaction {transaction.id} already exists")
-            

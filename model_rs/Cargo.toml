@@ -1,0 +1,15 @@
+[package]
+name = "model_rs"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "model_rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = "0.23.1"
+chrono =  { version = "*", features = ["serde"] }
+iso_currency = {version = "*", features = ["serde"]}
+serde = { version = "*", features = ["derive"] }
