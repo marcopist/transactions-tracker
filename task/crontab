@@ -1,4 +1,0 @@
-0 10 * * * "python -m transactions_task"
-0 13 * * * "python -m transactions_task"
-0 18 * * * "python -m transactions_task"
-0 21 * * * "python -m transactions_task"

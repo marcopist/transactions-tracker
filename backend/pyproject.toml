@@ -1,14 +1,11 @@
 [project]
-name = "transactions-api"
+name = "transactions"
 version = "0.1.0"
 dependencies = [
-    "pyyaml",
-    "requests",
-    "pp-ez",
-    "urllib3",
-    "pymongo",
-    "flask",
-    "gunicorn"
+    "bunnet",
+    "iso4217",
+    "python-dateutil",
+    "pydantic"
 ]
 
 [build-system]
