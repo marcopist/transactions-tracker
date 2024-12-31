@@ -1,24 +1,8 @@
 services:
   task:
-    build: ./task
-    command: "python -m transactions-task"
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    command: python -m transactions.nordigen.schedule
     env_file:
       - .env
-    depends_on:
-      - db
-    restart: unless-stopped
-  api:
-    build: ./api
-    command: "gunicorn --bind 0.0.0.0:8000 -w 4 'transactions-api:app'"
-    env_file:
-      - .env
-    ports:
-      - 8000:8000
-    depends_on:
-      - db
-    restart: unless-stopped
-  db:
-    image: mongo:latest
-    restart: unless-stopped
-    volumes:
-      - /data/db/transactions:/data/db

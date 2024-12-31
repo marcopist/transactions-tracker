@@ -1,11 +1,15 @@
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from functools import partial
 from itertools import chain
+
+import dateutil.parser as date_parser
 from bunnet import Document, Indexed
 from iso4217 import Currency
 from pydantic import BaseModel
-import dateutil.parser as date_parser
+
+from transactions.data_structures.structured_enum import StructuredEnum
 
 
 class Amount(BaseModel):
@@ -13,24 +17,19 @@ class Amount(BaseModel):
     amount: float
 
 
-class Tag:
-    __class__ = type("Tag", (BaseModel,), {})
+class TimeInfo(StructuredEnum):
+    @dataclass
+    class Unknown:
+        pass
 
-    class OneOff(__class__):
-        ...
+    @dataclass
+    class OneOff:
+        date: datetime
 
-    class Periodic(__class__):
-        from_date: datetime
-        to_date: datetime
-
-    class Untagged(__class__):
-        ...
-
-    _members = [
-        OneOff,
-        Periodic,
-        Untagged,
-    ]
+    @dataclass
+    class TimeRange:
+        start: datetime
+        end: datetime
 
 
 class TransactionStatus(Enum):
@@ -45,12 +44,12 @@ class Transaction(Document):
     amount: Amount
     short_name: str
     status: TransactionStatus
-    tags: None
+    time_info: TimeInfo
 
     class Settings:
         name = "transactions"
 
-    def apply_tag(self, tag: Tag):
+    def apply_tag(self, tag: TimeInfo):
         self.tags = tag
         self.save()
 
@@ -90,7 +89,7 @@ class Transaction(Document):
             amount=amount,
             short_name=short_name,
             status=status,
-            tags=None,
+            time_info=TimeInfo.Unknown(),
         )
 
     @classmethod

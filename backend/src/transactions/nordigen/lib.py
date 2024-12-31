@@ -4,7 +4,7 @@ import uuid
 from nordigen import NordigenClient
 from requests import HTTPError
 from loguru import logger
-from .odm import Transaction, BankConnection
+from transactions.odm import Transaction, BankConnection
 
 GO_CARDLESS_SECRET_ID = os.getenv("GO_CARDLESS_SECRET_ID")
 GO_CARDLESS_SECRET_KEY = os.getenv("GO_CARDLESS_SECRET_KEY")
@@ -52,7 +52,8 @@ def link_account(bank_name: str):
 
 @retry_with_new_token
 def task():
-    bank_connections = BankConnection.find()
+    bank_connections = list(BankConnection.find())
+    logger.info(f"Found {len(bank_connections)} bank connections")
     for bank_connection in bank_connections:
         bank_name = bank_connection.bank_name
         logger.info(f"Processing transactions for bank connection {bank_name}")
@@ -78,7 +79,3 @@ def task():
         logger.info(f"Processed transactions for all accounts at {bank_name}")
 
     logger.info("Processed transactions for all bank connections")
-
-
-if __name__ == "__main__":
-    task()

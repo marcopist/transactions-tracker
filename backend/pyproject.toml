@@ -5,7 +5,12 @@ dependencies = [
     "bunnet",
     "iso4217",
     "python-dateutil",
-    "pydantic"
+    "pydantic",
+    "loguru",
+    "requests",
+    "nordigen",
+    "schedule",
+    "fastapi[standard]",
 ]
 
 [build-system]
